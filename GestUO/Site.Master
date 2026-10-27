@@ -1,0 +1,513 @@
+﻿ <%@ Master Language="C#" AutoEventWireup="true" CodeBehind="Site.master.cs" Inherits="GestUO.SiteMaster" %>
+
+<%@ Import Namespace="GestUO.Classi" %>
+<!DOCTYPE html>
+<html lang="it">
+<head runat="server">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title><%: Page.Title %> - G.e.s.t.U.O.</title>
+
+    <asp:PlaceHolder runat="server">
+        <%: Scripts.Render("~/bundles/modernizr") %>
+    </asp:PlaceHolder>
+    <webopt:BundleReference runat="server" Path="~/Content/css" />
+    <link href="~/favicon.ico" rel="shortcut icon" type="image/x-icon" />
+
+    <style>
+          .btn-custom-size {
+      width: 160px !important; /* Larghezza fissa uguale per tutti */
+      height: 45px !important; /* Altezza fissa uguale per tutti */
+      white-space: wrap; /* Impedisce al testo di andare su due righe */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.15rem; /* Regola la dimensione del testo se necessario */
+  }
+        /* Inserisci questo nella Site.Master o nel file .css */
+        .modal-custom-wide {
+            width: 95% !important;
+            max-width: 95% !important; /* Forza la larghezza massima */
+            margin-left: auto !important;
+            margin-right: auto !important;
+        }
+
+        @media (min-width: 1200px) {
+            .modal-custom-wide {
+                width: 90% !important;
+                max-width: 1600px !important; /* Limite massimo per schermi enormi */
+            }
+        }
+
+        .modal-custom-wide .modal-body {
+            /* Imposta un'altezza minima per 15 righe per evitare rimpicciolimenti durante il cambio pagina */
+            min-height: 650px;
+            padding-top: 0;
+        }
+
+        /* Mantieni l'header della tabella fisso se il modal diventa troppo lungo */
+        .table-responsive {
+            max-height: 70vh; /* Il contenuto scorre internamente se supera il 70% dell'altezza schermo */
+            overflow-y: auto;
+        }
+
+        body {
+            padding-top: 70px;
+            background-color: #f8f9fa;
+        }
+
+        /* Navbar con gradiente professionale */
+        .navbar-custom {
+            min-height: 65px;
+            background-color: #337ab7 !important;
+        }
+
+            .navbar-custom .navbar-nav > li > a {
+                color: #ffffff !important;
+                font-weight: 600; /* Rende il testo più leggibile */
+                text-transform: uppercase;
+                font-size: 1.3rem; /* Aumentato da 0.85rem a 1.1rem */
+                letter-spacing: 0.8px; /* Spaziatura tra lettere migliorata */
+                padding-top: 20px !important; /* Più spazio verticale */
+                padding-bottom: 20px !important;
+                padding-left: 15px !important;
+                padding-right: 15px !important;
+                transition: 0.3s;
+            }
+
+                .navbar-custom .navbar-nav > li > a:hover {
+                    background: rgba(255,255,255,0.1) !important;
+                }
+
+        /* Sottomenu a comparsa laterale */
+        .dropdown-submenu {
+            position: relative;
+        }
+
+            .dropdown-submenu > .dropdown-menu {
+                top: 0;
+                left: 100%;
+                margin-top: -1px;
+                border-radius: 4px;
+            }
+        /* Ingrandimento voci dei sottomenu (dropdown) */
+        .dropdown-menu > li > a {
+            font-size: 1.4rem; /* Ingrandito anche il testo del dropdown */
+            padding: 10px 20px; /* Più spazio per il click/tap */
+            font-weight: 500;
+        }
+        /* Ingrandimento sottomenu laterali */
+        .dropdown-submenu > a {
+            font-size: 1.4rem !important;
+        }
+
+        .dropdown-submenu:hover > .dropdown-menu {
+            display: block;
+            background-color: yellow;
+        }
+
+        .dropdown-submenu > a:after {
+            content: "\25B6";
+            float: right;
+            margin-left: 10px;
+            font-size: 0.7em;
+            opacity: 0.7;
+        }
+
+        /* Watermark Logo */
+        .sfondo-personalizzato {
+            position: relative;
+            min-height: 95vh;
+        }
+
+            .sfondo-personalizzato::before {
+                content: "";
+                position: fixed;
+                top: 55%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                width: 50%;
+                height: 50%;
+                background-image: var(--url-sfondo);
+                /*background-image: url('<%= ResolveUrl("~/FileComuni/Logo2.jpeg") %>');*/
+                background-repeat: no-repeat;
+                background-position: center;
+                background-size: contain;
+                opacity: 0.54;
+                z-index: -1;
+                pointer-events: none;
+            }
+
+        .user-log-pill {
+            background: rgba(255,255,255,0.15);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            margin-top: 10px;
+            font-size: 0.85rem;
+        }
+
+        #wordViewerFrame {
+            width: 100%;
+            height: 750px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        /* Log Utente più visibile */
+        .user-log-pill {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            padding: 8px 18px;
+            border-radius: 20px;
+            margin-top: 12px;
+            font-size: 1rem; /* Ingrandito nome utente */
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <form runat="server">
+        <asp:ScriptManager runat="server">
+            <Scripts>
+                <asp:ScriptReference Name="MsAjaxBundle" />
+                <asp:ScriptReference Path="~/Scripts/jquery-3.7.1.js" />
+                <asp:ScriptReference Name="bootstrap" />
+                <asp:ScriptReference Path="~/Scripts/bootstrap.bundle.min.js" />
+                <asp:ScriptReference Name="WebForms.js" Assembly="System.Web" Path="~/Scripts/WebForms/WebForms.js" />
+                <asp:ScriptReference Name="WebFormsBundle" />
+            </Scripts>
+        </asp:ScriptManager>
+
+        <nav class="navbar navbar-inverse navbar-fixed-top navbar-custom">
+            <div class="container-fluid">
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                        <span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span>
+                    </button>
+                    <a class="navbar-brand nav-link active" href="~/View/Default.aspx" runat="server" style="color: white !important; font-weight: bold;">G.E.S.T.U.O. System</a>
+                </div>
+
+                <div class="navbar-collapse collapse">
+                    <ul class="nav navbar-nav">
+
+                        <li id="menuAmministratore" runat="server" visible="false" class="dropdown">
+                            <a href="#" class="dropdown-toggle nav-link active" data-toggle="dropdown">Dashboard <span class="caret"></span></a>
+                            <ul class="dropdown-menu">
+                                <li><a id="menuAttivita" runat="server" visible="false" href="~/View/Attivita">Attività</a></li>
+                                <li><a id="Amministratore" runat="server" visible="false" href="~/View/Dashboard">Dashboard</a></li>
+                                <li><a id="SchedaCarburante" runat="server" visible="false" href="~/View/GestioneAuto">Scheda Carburante</a></li>
+                                <li><a id="Turnazione" runat="server" visible="false" href="~/View/Turnazione">Turnazione</a></li>
+                            </ul>
+                        </li>
+                        <li id="menuUo" runat="server" visible="false" class="dropdown">
+                            <a href="#" class="dropdown-toggle nav-link active" data-toggle="dropdown">Unità Operativa <span class="caret"></span></a>
+                            <ul class="dropdown-menu">
+                                <%--<li><a id="UoChiaia" runat="server" visible="false" href="~/View/Visualizza">UO CHIAIA</a></li>--%>
+                                <li>
+                                    <asp:HyperLink ID="HlinkChiaia" runat="server" Visible="false"
+                                        NavigateUrl="~/View/Visualizza?uo=Chiaia"
+                                        Text="UO CHIAIA" />
+                                </li>
+                                <%--<li><a id="UoScampia" runat="server" visible="false" href="~/View/Visualizza">UO SCAMPIA</a></li>--%>
+                                <li>
+                                    <asp:HyperLink ID="HlinkScampia" runat="server" Visible="false"
+                                        NavigateUrl="~/View/Visualizza?uo=Scampia"
+                                        Text="UO SCAMPIA" />
+                                </li>
+                            </ul>
+                        </li>
+                        <li><a id="Attivita" runat="server" visible="false" href="~/View/Attivita">Attività</a></li>
+
+                        <li id="menuArchivio" runat="server" visible="false" class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">Archivio <span class="caret"></span></a>
+                            <ul class="dropdown-menu">
+                                <li id="subMenuUOTE" runat="server" visible="false" class="dropdown-submenu">
+                                    <a href="#">Archivio UOTE</a>
+                                    <ul class="dropdown-menu">
+                                        <li><a id="InserimentoArchivioUote" runat="server" visible="false" href="~/View/InserimentoArchivio">Inserimento Pratica</a></li>
+                                        <li><a id="RicercaArchivioUote" runat="server" visible="false" href="~/View/RicercaArchivio">Ricerca Pratica</a></li>
+                                    </ul>
+                                </li>
+                                <li id="subMenuUOTP" runat="server" visible="false" class="dropdown-submenu">
+                                    <a href="#">Archivio UOTP</a>
+                                    <ul class="dropdown-menu">
+                                        <li><a id="InserimentoArchivioUotp" runat="server" visible="false" href="~/View/Uotp/InserimentoArchivioUotp">Inserimento Pratica TP</a></li>
+                                        <li><a id="RicercaArchivioUotp" runat="server" visible="false" href="~/View/Uotp/RicercaArchivioUotp">Ricerca Pratica TP</a></li>
+                                    </ul>
+                                </li>
+                                <li class="divider"></li>
+                                <li><a id="GestionePraticaUote" runat="server" visible="false" href="~/View/GestionePratica">Gestione Pratica</a></li>
+                                <li><a id="StatisticheAtti" runat="server" visible="false" href="~/View/StatisticheAtti">Statistiche</a></li>
+                            </ul>
+                        </li>
+
+                        <li id="menuCoordinamentoAtti" runat="server" visible="false" class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">Coordinamento Atti <span class="caret"></span></a>
+                            <ul class="dropdown-menu">
+                                <li><a id="InserimentoAtti" runat="server" visible="false" href="~/View/Inserimento">Inserimento Atti</a></li>
+                                <li><a id="RicercaAtti" runat="server" visible="false" href="~/View/Visualizza">Ricerca Atti</a></li>
+                            </ul>
+                        </li>
+
+                        <li><a id="menuScadenziario" runat="server" onserverclick="menuScadenziario_ServerClick" visible="false">Scadenziario</a></li>
+
+                        <li id="menuOperatori" runat="server" visible="false" class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">Rapportino Di Servizio <span class="caret"></span></a>
+                            <ul class="dropdown-menu">
+                                <li><a id="Decretazione" runat="server" visible="false" href="~/View/Modifica">Decretazione</a></li>
+                                <li><a id="NuovaRapportino" runat="server" visible="false" href="~/View/Rapportino">Nuovo Rapportino</a></li>
+                                <li><a id="RicercaRapportino" runat="server" visible="false" href="~/View/RicercaRapportino">Ricerca Rapportino</a></li>
+                                <li><a id="mnGestioneAuto" runat="server" visible="false" href="~/View/GestioneAuto">Scheda Carburante</a></li>
+                                <li><a id="EstraiStatistiche" runat="server" visible="false" href="~/View/EstraiStatistiche">Statistiche</a></li>
+                                <li><%--<a id="CaricaScheda" runat="server" visible="false" href="~/View/CaricaScheda">Carica Scheda</a>--%></li>
+                            </ul>
+                        </li>
+
+                        <li id="menuFureria" runat="server" visible="false" class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">Fureria <span class="caret"></span></a>
+                            <ul class="dropdown-menu">
+                                <li><a id="FSchedaDipendente" runat="server" visible="false" href="~/View/SchedaDipendente">Scheda Dipendente</a></li>
+                                <li><a id="AccTrunoMensile" runat="server" visible="false" href="~/View/Turnazione">Turnazione Mensile Acc.</a></li>
+                                <li><a id="TurnoMensile" runat="server" visible="false" href="~/View/Turnazione">Turnazione Mensile</a></li>
+                            </ul>
+                        </li>
+
+                        <li id="menuSegreteria" runat="server" visible="false" class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">Ufficio PG <span class="caret"></span></a>
+                            <ul class="dropdown-menu">
+                                <li><a id="StatistichePg" runat="server" visible="false" href="~/View/StatistichePg">Statistiche</a></li>
+                                <li><a id="PG" runat="server" visible="false" href="~/View/Segreteria">Ufficio PG</a></li>
+                            </ul>
+                        </li>
+                        <li><a id="menuSicurezza" runat="server" visible="false" href="~/View/GestioneAuto">Scheda Carburante</a></li>
+                        <li><a id="menuManTabelle" runat="server" visible="false" href="~/View/ManutenzioneTabelle">Tabelle</a></li>
+                        <%--<li><a id="Urp" runat="server" visible="false" href="~/View/Urp">Urp</a></li>--%>
+
+
+
+                        <li id="menuEsci" runat="server" visible="false">
+                            <asp:LinkButton ID="lnkLogout" runat="server" OnClick="Esci_Click" CssClass="text-danger fw-bold">ESCI</asp:LinkButton>
+                        </li>
+                    </ul>
+
+                    <ul class="nav navbar-nav navbar-right" style="margin-right: 15px;">
+                        <li id="userLog" runat="server" visible="false" >
+                            <div class="user-log-pill">
+                                <span class="fa-solid fa-user" ></span>&nbsp;
+                                <asp:Label ID="lblUser" runat="server" Font-Size="Larger"/>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <%-- contiene i logo delle uo --%>
+        <div id="divSfondo" runat="server" class="container body-content sfondo-personalizzato">
+            <div id="viewerContainer" style="display: none; margin-bottom: 20px;">
+                <iframe id="wordViewerFrame" src=""></iframe>
+            </div>
+
+            <asp:ContentPlaceHolder ID="MainContent" runat="server"></asp:ContentPlaceHolder>
+
+
+        </div>
+        <footer class="text-center" style="margin-top: -30px; padding: 20px; border-top: 1px solid #eee;">
+            <asp:Label ID="lblMsg" runat="server" CssClass="label label-danger" Style="display: block; margin-bottom: 10px;"></asp:Label>
+            <p>&copy; <%: DateTime.Now.Year %> - <strong>POLIZIA MUNICIPALE NAPOLI</strong> | <i>Per Gentile Concessione</i> <i style="color: red">Pietro Antonacci</i></p>
+        </footer>
+        <%-- area popup --%>
+        <div class="modal fade" id="SiteModal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div id="modalHeaderColor" runat="server" class="modal-header">
+                        <h4 class="modal-title">
+                            <asp:Label ID="lblModalTitolo" runat="server" Text="Avviso" /></h4>
+                    </div>
+                    <div class="modal-body text-center">
+                        <p id="TxtMessage" runat="server" class="lead"></p>
+                    </div>
+                    <div class="modal-footer">
+                        <asp:Button ID="btChiudiPopUp" runat="server" CssClass="btn btn-default" Text="Chiudi" OnClick="btChiudiPopUp_Click" />
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="ModalConferma" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header bg-warning">
+                        <h4 class="modal-title">
+                            <asp:Label ID="lblTitoloConferma" runat="server" Text="Conferma" /></h4>
+                    </div>
+                    <div class="modal-body">
+                        <asp:Label ID="lblTestoConferma" runat="server" Text="Procedere con l'operazione?" />
+                        <input type="hidden" id="hdnUrlDestinazione" />
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Annulla</button>
+                        <button type="button" class="btn btn-primary" onclick="EseguiRedirect()">Prosegui</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <%-- Modal scadenze deleghe --%>
+        <div class="modal fade" id="DelegheScadenza" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered modal-custom-wide">
+                <div class="modal-content border-0 shadow">
+                    <div class="modal-header bg-danger text-white">
+                        <h5 class="modal-title">SCADENZIARIO</h5>
+                        <%--<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>--%>
+                    </div>
+                    <%--<div style="padding-left: 1em">
+                        <asp:Label ID="Label10" runat="server" Text="Num. giorni alla scadenza" CssClass="form-label d-block mb-2"></asp:Label>
+                        <asp:TextBox ID="txtGiorniScad" runat="server" CssClass="form-control larghezzaText70" AutoPostBack="True" placeholder="num. gg" MaxLength="3" OnTextChanged="txtGiorniScad_TextChanged"> </asp:TextBox>
+                    </div>--%>
+
+                    <div class="modal-body p-4 ">
+                        <div class="d-flex justify-content-center align-items-center gap-3 mt-3">
+                            <div class="dashboard-header">
+                                <h1><span class="fa-solid fa-gear fa-spin"></span>DELEGHE AG IN SCADENZA</h1>
+                            </div>
+                            <asp:LinkButton ID="btnPrecedente" runat="server" CssClass="btn btn-outline-primary btn-sm" OnClick="btnPrecedente_Click">
+                                 <i class="bi bi-chevron-left"></i> Precedente
+                            </asp:LinkButton>
+
+                            <span class="fw-bold text-muted">Pagina
+                                <asp:Label ID="lblPaginaCorrente" runat="server" Text="1"></asp:Label>
+                                di
+                                <asp:Label ID="lblTotalePagine" runat="server" Text="1"></asp:Label>
+                            </span>
+
+                            <asp:LinkButton ID="btnSuccessivo" runat="server" CssClass="btn btn-outline-primary btn-sm" OnClick="btnSuccessivo_Click">
+        Successivo <i class="bi bi-chevron-right"></i>
+                            </asp:LinkButton>
+                        </div>
+                        <%-- Repeater deleghe in scadenza --%>
+                        <div id="divRepeater" runat="server" class="table-responsive shadow-sm rounded">
+                            <asp:Repeater ID="rptDelegheScadenza" runat="server" OnItemDataBound="rptDelegheScadenza_ItemDataBound">
+                                <HeaderTemplate>
+                                    <table class="table table-hover table-striped align-middle mb-0 bg-white">
+                                        <thead class="table-dark">
+                                            <tr>
+                                                <th runat="server" scope="col" visible="false">Termine giorni</th>
+                                                <th scope="col">N. Carico</th>
+                                                <th scope="col">Anno</th>
+                                                <th scope="col" style="white-space: nowrap;">
+                                                    <span style="display: inline-block; vertical-align: bottom;">Macro Area</span>
+                                                    <asp:TextBox ID="txtFiltroMacroArea" runat="server"
+                                                        CssClass="form-control form-control-sm larghezzaText70"
+                                                        Style="display: inline-block; vertical-align: middle; margin-left: 5px;"
+                                                        placeholder="Filtra..."
+                                                        AutoPostBack="True"
+                                                        OnTextChanged="txtFiltroMacroArea_TextChanged">
+                                                    </asp:TextBox>
+                                                </th>
+                                                <th scope="col">N. Pratica</th>
+                                                <%--<th scope="col" style="width: 10%;">Sigla</th>--%>
+                                                <th scope="col">Proc. Penale</th>
+                                                <th scope="col">Data Scadenza</th>
+                                                <th scope="col" class="text-center">N. gg alla scadenza</th>
+
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                </HeaderTemplate>
+
+                                <ItemTemplate>
+                                    <tr>
+                                        <td visible="false" runat="server">
+                                            <asp:Literal ID="litGiorniRimanenti" runat="server" Text='<%# Eval("GgDelega") %>'></asp:Literal>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <i class="bi  fs-5 me-2 text-primary"></i>
+
+                                                <span class="fw-semibold">
+                                                    <%--<asp:LinkButton ID="lnkProtocollo" runat="server" OnClick="lnkProtocollo_Click"><%# Eval("Nr_Protocollo") %> </asp:LinkButton>--%>
+
+                                                    <itemtemplate>
+                                                        <asp:HyperLink ID="lnkScheda" runat="server"
+                                                            NavigateUrl='<%# String.Format("~/View/Visualizza.aspx?idscheda={0}&Nr_Protocollo={1}&Anno={2}", Eval("ID"), Eval("Nr_Protocollo"), Eval("Anno")) %>'
+                                                            Target="_blank"
+                                                            Text='<%# Eval("Nr_Protocollo") %>'>
+                                                        </asp:HyperLink>
+
+                                                    </itemtemplate>
+
+                                                </span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span><%# Eval("Anno") %></span>
+                                        </td>
+                                        <td>
+                                            <span><%# Eval("Macro_area") %></span>
+                                        </td>
+
+                                        <td>
+                                            <span><%# Eval("Nr_Pratica") %></span>
+                                        </td>
+
+
+                                        <td>
+                                            <span><%# Eval("ProcedimentoPen") %></span>
+                                        </td>
+                                        <%--                                        <td style="text-align: left !important;">
+                                            <div class="d-flex align-items-center" style="justify-content: flex-start !important;">
+                                                <i class="bi bi-person-circle fs-5 me-2 text-primary"></i>
+                                                <span class="fw-semibold"><%# Eval("Nominativo") %></span>
+                                            </div>
+                                        </td>--%>
+                                        <td>
+                                            <span style="color: orangered"><%# Routine.FormatMyDate(Eval("DataDelega")) %> </span>
+                                        </td>
+                                        <td>
+                                            <span>
+                                                <asp:Literal ID="litGGScadenza" runat="server"></asp:Literal></span>
+                                        </td>
+                                    </tr>
+                                </ItemTemplate>
+
+                                <FooterTemplate>
+                                    </tbody>
+                            </table>
+                                    <asp:PlaceHolder ID="phEmpty" runat="server" Visible='<%# rptDelegheScadenza.Items.Count == 0 %>'>
+                                        <div class="p-4 text-center border-top">
+                                            <i class="bi bi-info-circle text-muted fs-2"></i>
+                                            <p class="text-muted mt-2">Nessun dato trovato.</p>
+                                        </div>
+                                    </asp:PlaceHolder>
+                                </FooterTemplate>
+                            </asp:Repeater>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <asp:Button ID="btChiudiPop" runat="server" CssClass="btn btn-secondary w-100" Text="Chiudi" OnClick="btChiudiPop_Click" />
+                        <asp:Button ID="btBack" runat="server" CssClass="btn btn-secondary w-100" Text="Azzera filtro" OnClick="btBack_Click" />
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script type="text/javascript">
+            function ApriModalConferma(titolo, messaggio, url) {
+                $('#hdnUrlDestinazione').val(url);
+                $('#ModalConferma').modal('show');
+            }
+            function EseguiRedirect() {
+                var url = $('#hdnUrlDestinazione').val();
+                if (url) { window.location.href = url; }
+            }
+        </script>
+        <asp:HiddenField ID="hfMasterParam" runat="server" ClientIDMode="Static" />
+    </form>
+    <script src='<%= ResolveUrl("~/Scripts/Utility.js") %>'>
+
+    </script>
+
+</body>
+</html>
